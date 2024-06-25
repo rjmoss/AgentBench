@@ -1,18 +1,18 @@
 import os
+import traceback
+from copy import deepcopy
 from typing import Dict, Any
 
 from src.server.task import Task, Session
 from src.server.tasks.alfworld.environment import SingleAlfredTWEnv
 from src.server.tasks.alfworld.utils import *
 from src.typings import TaskOutput, TaskSampleExecutionResult, SampleStatus, AgentOutputStatus
-from copy import deepcopy
-import traceback
 
 
 class ALFWorld(Task):
 
     def __init__(self, **kwargs):
-        # load data_path 
+        # load data_path
         self.data_path = kwargs.get("data_path", None)
         if self.data_path is None:
             raise Exception("missing parameter data_path")
@@ -29,6 +29,8 @@ class ALFWorld(Task):
         if self.prompts_path is None:
             raise Exception("missing parameter prompts_path")
         self.prompts = load_prompts(self.prompts_path)
+
+        self.retry_invalid_action = kwargs.get("retry_invalid_action", False)
 
         # prepare data_files
         self.data_files = []
@@ -63,8 +65,12 @@ class ALFWorld(Task):
         """
         overall = {
             "total": len([config for config in results if config]),
-            "pass": len([config for config in results if
-                         (config and config.result and int(config.result.get("result", 0) == 1))]),
+            "pass": len(
+                [config for config in results if
+                 (config and config.result and isinstance(config.result, dict) and int(
+                     config.result.get("result", 0) == 1
+                     ))]
+            ),
         }
         overall["wrong"] = overall["total"] - overall["pass"]
         overall["success_rate"] = overall["pass"] / overall["total"] if overall["total"] else 0
@@ -125,8 +131,8 @@ class ALFWorld(Task):
 
     @staticmethod
     def get_task_instruction():
-        # return "Interact with a household to solve a task. Imagine you are an intelligent agent in a household environment and your target is to perform actions to complete the task goal. In the beginning of your interactions, you will be given the detailed description of the current environment and your goal to accomplish. For each of your turn, you should choose from two actions: \"THOUGHT\" or \"ACTION\". If you choose \"THOUGHT\", you should first think about the current condition and plan for your future actions, and then output your action in this turn. Your output must strictly follow this format:\"THOUGHT: your thoughts.\n ACTION: your next action\n\"; If you choose \"ACTION\", you should directly output the action in this turn. Your output must strictly follow this format:\"ACTION: your next action\n\". After your each turn, the environment will give you immediate feedback based on which you plan your next few steps. if the envrionment output \"Nothing happened\", that means the previous action is invalid and you should try more options.\n\n"
-        return "Interact with a household to solve a task. Imagine you are an intelligent agent in a household environment and your target is to perform actions to complete the task goal. At the beginning of your interactions, you will be given the detailed description of the current environment and your goal to accomplish. For each of your turn, you will be given a list of actions which you can choose one to perform in this turn. You should choose from two actions: \"THOUGHT\" or \"ACTION\". If you choose \"THOUGHT\", you should first think about the current condition and plan for your future actions, and then output your action in this turn. Your output must strictly follow this format:\"THOUGHT: your thoughts.\n ACTION: your next action\n\"; If you choose \"ACTION\", you should directly output the action in this turn. Your output must strictly follow this format:\"ACTION: your next action\n\". After your each turn, the environment will give you immediate feedback based on which you plan your next few steps. if the environment output \"Nothing happened\", that means the previous action is invalid and you should try more options.\n Reminder: \n1. the action must be chosen from the given available actions. Any actions except provided available actions will be regarded as illegal. \n2. Think when necessary, try to act directly more in the process.\n\n"
+        # NB - Warning it here that it can only carry one item at a time.
+        return "Interact with a household to solve a task. Imagine you are an intelligent agent in a household environment and your target is to perform actions to complete the task goal. At the beginning of your interactions, you will be given the detailed description of the current environment and your goal to accomplish. For each of your turns, you will be given a list of actions which you can choose one to perform in this turn. You can either think then choose and action or directly choose an action. If you first think your output must strictly follow this format:\"THOUGHT: your thoughts.\n ACTION: your next action\n\"; If you act directly your output must strictly follow this format:\"ACTION: your next action\n\". After your each turn, the environment will give you immediate feedback based on which you plan your next few steps. If you are warned that your action was invalid or if the environment outputs \"Nothing happened\", that means the previous action is invalid and you should try more options.\n Note that you cannot carry more than one object at a time.\n Reminder: \n1. the action must be chosen from the given available actions. Any actions except provided available actions will be regarded as illegal. \n2. Think when necessary, try to act directly more in the process.\n\n"
 
     def get_prompt(self, filename: str):
         # return []
@@ -163,7 +169,8 @@ class ALFWorld(Task):
         log_info = {"log": []}
         session.inject({"role": "user", "content": self.get_task_instruction()})
         session.inject(
-            {"role": "agent", "content": "OK. I'll follow your instructions and try my best to solve the task."})
+            {"role": "agent", "content": "OK. I'll follow your instructions and try my best to solve the task."}
+        )
 
         # 1-shot naive example
         history = self.get_prompt(name)
@@ -173,7 +180,7 @@ class ALFWorld(Task):
         init_prompt = "Here is your task. " + ob + self.get_available_actions(info.get('admissible_commands', [[]])[0])
         log_info["init_prompt"] = init_prompt
         session.inject({"role": "user", "content": init_prompt})
-        # init 
+        # init
         # for his in session.history:
         #     print(his)
         # print("============ history end ==============")
@@ -188,17 +195,62 @@ class ALFWorld(Task):
 
             # process action
             admissible_commands = info.get('admissible_commands', [[]])[0]
-            action = process_action(output, admissible_commands)
+            action = process_action(output, admissible_commands, limit=0.7)
             if not action:
+                if self.retry_invalid_action:
+                    session.history[-2].content = session.history[-2].content.split("AVAILABLE ACTIONS")[
+                        0]  # reduce the prompt length
+
+                    feedback_invalid = "You have tried to take an invalid action, please only take one of the available actions."
+                    session.inject(
+                        {
+                            "role": "user",
+                            "content": feedback_invalid + self.get_available_actions(
+                                info.get('admissible_commands', [[]])[0]
+                            )
+                        }
+                    )
+
+                    # save
+                    payload = {
+                        "round": i + 1,
+                        "output": output,
+                        "action": action,
+                        "admissible_commands": admissible_commands,
+                        "observation": feedback_invalid,
+                        "done": False,
+                    }
+                    log_info["log"].append(payload)
+                    # failure test
+                    if len(log_info["log"]) > 3:
+                        pre_logs = log_info["log"][-3:]
+                        pre_acts = [pre_log["output"] for pre_log in pre_logs]
+                        if len(list(set(pre_acts))) == 1:
+                            print("repeat actions for 3 times: failure")
+                            return 0, log_info, SampleStatus.AGENT_INVALID_ACTION
+                    continue
+
                 finish_reason = SampleStatus.AGENT_INVALID_ACTION
+                payload = {
+                    "round": i + 1,
+                    "output": output,
+                    "action": action,
+                    "admissible_commands": admissible_commands,
+                    "observation": None,
+                    "done": False,
+                }
+                log_info["log"].append(payload)
                 break
             session.history[-2].content = session.history[-2].content.split("AVAILABLE ACTIONS")[
                 0]  # reduce the prompt length
 
             observation, reward, done, info = env.step([action])
             observation, reward, done = process_ob(observation[0]), info['won'][0], done[0]
-            session.inject({"role": "user", "content": observation + self.get_available_actions(
-                info.get('admissible_commands', [[]])[0])})
+            session.inject(
+                {"role": "user", "content": observation + self.get_available_actions(
+                    info.get('admissible_commands', [[]])[0]
+                )}
+            )
 
             # save
             payload = {

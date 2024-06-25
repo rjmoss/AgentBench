@@ -1,6 +1,7 @@
 import contextlib
 import time
 import warnings
+from typing import Optional
 
 import requests
 from urllib3.exceptions import InsecureRequestWarning
@@ -169,6 +170,7 @@ class HTTPAgent(AgentClient):
         body=None,
         headers=None,
         return_format="{response}",
+        logits_format="{response[choices][0][logprobs][content][0][logprob]}",
         prompter=None,
         **kwargs,
     ) -> None:
@@ -178,6 +180,7 @@ class HTTPAgent(AgentClient):
         self.headers = headers or {}
         self.body = body or {}
         self.return_format = return_format
+        self.logits_format = logits_format
         self.prompter = Prompter.get_prompter(prompter)
         if not self.url:
             raise Exception("Please set 'url' parameter")
@@ -185,7 +188,7 @@ class HTTPAgent(AgentClient):
     def _handle_history(self, history: List[dict]) -> Dict[str, Any]:
         return self.prompter(history)
 
-    def inference(self, history: List[dict]) -> str:
+    def inference(self, history: List[dict]) -> tuple[str, Optional[str]]:
         for _ in range(3):
             try:
                 body = self.body.copy()
@@ -210,6 +213,10 @@ class HTTPAgent(AgentClient):
                 pass
             else:
                 resp = resp.json()
-                return self.return_format.format(response=resp)
+                if body.get('logprobs'):
+                    return self.return_format.format(response=resp), self.logits_format.format(response=resp)
+                else:
+                    return self.return_format.format(response=resp), None
+
             time.sleep(_ + 2)
         raise Exception("Failed.")

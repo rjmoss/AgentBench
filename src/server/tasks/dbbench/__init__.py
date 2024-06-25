@@ -205,6 +205,7 @@ class DBBench(Task):
                             except:
                                 pass
                     total += 1
+                    entry["result"] = correct  # save on each result whether it is correct or not
                 if total == 0:
                     print(f"WARNING: {typ} does not exist!")
                     return 0

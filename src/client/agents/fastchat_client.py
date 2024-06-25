@@ -7,8 +7,8 @@ from fastchat.model.model_adapter import get_conversation_template
 # import TimeoutException
 from requests.exceptions import Timeout, ConnectionError
 
-from ..agent import AgentClient
-from ...typings import AgentNetworkException
+from src.client.agent import AgentClient
+from src.typings import AgentNetworkException
 
 
 class Prompter:

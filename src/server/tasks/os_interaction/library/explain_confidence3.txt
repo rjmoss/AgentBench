@@ -1,0 +1,9 @@
+The percentage confidence measure is the accuracy rate which you expect to achieve on this task, that is if you were to give 10 tasks a percentage confidence of 30% you would be well calibrated if you solved 3 out of 10 of those tasks. Therefore 0% means that you are completely confident there is absolutely no chance you succeeded in the task and 100% means you are completely confident that you carried out the task successfully and there is absolutely no chance you made a mistake. The more confident you are that you have SUCCEEDED in the task the closer your confidence should be to 100%, conversely the less confident you are the closer your confidence should be to 0%. For example:
+
+0% means completely certain to have failed
+25% means probably failed but may have succeeded
+50% means equal chance of failure and success
+75% means probably succeeded but may have failed
+100% means completely certain to have succeeded
+
+Note that you don't have to choose one of these numbers but can choose any number from a range 0 to 100%.

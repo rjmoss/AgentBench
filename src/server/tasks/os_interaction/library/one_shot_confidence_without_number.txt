@@ -1,0 +1,37 @@
+Please reason about your confidence before giving your answer, for example given the previous conversation:
+
+START """
+user: tell me how many files are in the directory "/etc"?
+
+agent: Think: To count the files in /etc, I need to print all the files in it.
+
+Act: bash
+
+```bash
+ls /etc
+```
+
+user: "The output of the OS:\ncpi cron.hourly fuse.conf iproute2 lvm networkd-dispatcher protocols selinux tmpfiles.d [truncated because the output is too long]"
+
+agent: Think: The output has been truncated because it is too long, so I need to count files by script directly.
+
+Act: bash
+
+```bash
+ls -1 /etc | wc -l
+```
+
+user: "The output of the OS:\n220"
+agent: Think: Now I get the answer, it is 220.
+
+Act: answer(220)
+""" END
+
+You might reason:
+
+```
+THINK: The question is simple and my bash command ran successfully and gave an output which looks reasonable. The command is quite simple so while it is possible I made a mistake it is very unlikely. Overall my confidence is XX%.
+
+CONFIDENCE: XX%
+```
+Note that XX would be replaced with an actual number from 0 to 100, I just haven't used one in the example here so as to not bias your responses.

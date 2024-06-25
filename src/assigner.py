@@ -14,11 +14,11 @@ import yaml
 from tqdm import tqdm
 
 from src.client.task import TaskError
-from .client import TaskClient, AgentClient
-from .configs import ConfigLoader
-from .typings import AssignmentConfig, SampleIndex, TaskOutput, TaskClientOutput
-from .utils import ColorMessage
-from .utils import Graph, MaxFlow
+from src.client import TaskClient, AgentClient
+from src.configs import ConfigLoader
+from src.typings import AssignmentConfig, SampleIndex, TaskOutput, TaskClientOutput
+from src.utils import ColorMessage
+from src.utils import Graph, MaxFlow
 from time import sleep
 import contextlib
 import sys

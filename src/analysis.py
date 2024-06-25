@@ -8,12 +8,14 @@ from collections import OrderedDict
 
 import yaml
 
+from typings import SampleStatus
 from .configs import ConfigLoader
 from .utils import ColorMessage
 
 MODEL_MAP = {
     "gpt-4": "gpt-4",
     "gpt-3.5-turbo-0613": "gpt-3.5-turbo",
+    "gpt-3.5-turbo": "gpt-3.5-turbo",
     "llama-2-13b": "llama2-13b",
     "llama-2-7b": "llama2-7b",
     "chatglm-6b": "chatglm-6b",
@@ -42,13 +44,13 @@ MODEL_MAP = {
 }
 
 VALIDATION_MAP_FUNC = {
-    "Completed": lambda x: x["COMPLETED"],
-    "Context Limit Exceeded": lambda x: x["AGENT_CONTEXT_LIMIT"],
-    "Invalid Format": lambda x: x["AGENT_VALIDATION_FAILED"],
-    "Invalid Action": lambda x: x["AGENT_INVALID_ACTION"],
+    "Completed": lambda x: x[SampleStatus.COMPLETED],
+    "Context Limit Exceeded": lambda x: x[SampleStatus.AGENT_CONTEXT_LIMIT],
+    "Invalid Format": lambda x: x[SampleStatus.AGENT_VALIDATION_FAILED],
+    "Invalid Action": lambda x: x[SampleStatus.AGENT_INVALID_ACTION],
     # Not in above list
     "Task Limit Exceeded": lambda x: sum(
-        [x[t] for t in x if t in ["UNKNOWN", "TASK_ERROR", "TASK_LIMIT_REACHED"]]
+        [x[t] for t in x if t in [SampleStatus.UNKNOWN, SampleStatus.TASK_ERROR, SampleStatus.TASK_LIMIT_REACHED]]
     ),
 }
 

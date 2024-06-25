@@ -33,6 +33,7 @@ class AssignmentConfig(BaseModel):
     concurrency: ConcurrencyConfig
     definition: DefinitionConfig
     output: str = None
+    rh_config: dict = None
 
     @validator("assignments", pre=True)
     def assignments_validation(cls, v):

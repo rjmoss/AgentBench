@@ -1,0 +1,7 @@
+# 'agent', 'user' or 'both'
+ask_confidence_after: both
+remove_ask_confidence: true
+logits: false
+#filter_agent: gpt-4-turbo
+filter_task: os-dev
+base_agent: gpt-3.5-turbo

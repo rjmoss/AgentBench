@@ -5,6 +5,16 @@ os-dev:
     concurrency: 24
     round_limit: 8
 
+    # Custom flags
+    prompt: "ORIGINAL_W_FRAMEWORK"
+    oneshot: True
+    warn_remaining_tries: False
+    original_terminal_cleanup: False
+    intersperse_confidence: False
+    remove_intersperse: False
+    description: "Single task"
+    notes: ""
+
     docker_config:
       localhost: local-os
       directory: data/os_interaction/res/dockerfiles
@@ -27,6 +37,16 @@ os-std:
     name: "os-std"
     concurrency: 24
     round_limit: 8
+
+    # Custom flags
+    prompt: "ORIGINAL_W_FRAMEWORK"
+    oneshot: True
+    warn_remaining_tries: False
+    original_terminal_cleanup: False
+    intersperse_confidence: False
+    remove_intersperse: False
+    description: ""
+    notes: "After trying to fix the data"
 
     docker_config:
       localhost: local-os

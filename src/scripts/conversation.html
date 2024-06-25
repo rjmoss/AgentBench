@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Conversations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .conversation {
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            display: flex;
+            padding: 10px;
+            margin: 5px 0;
+        }
+        .user {
+            background-color: #d1e7dd;
+            align-self: flex-start;
+        }
+        .agent {
+            background-color: #f8d7da;
+            align-self: flex-end;
+        }
+        #filter {
+            margin-bottom: 20px;
+        }
+        .result-true {
+            border: 2px solid green;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .result-false {
+            border: 2px solid red;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .reasoning {
+            background-color: #f0e68c; /* Light yellow color */
+            align-self: flex-end;
+            padding: 10px;
+            margin: 5px 0;
+        }
+        .message-label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .user-label {
+            color: green;
+        }
+        .agent-label {
+            color: red;
+        }
+        .confidence-label {
+            color: red;
+        }
+        .reasoning-label {
+            color: orange;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chatbot Conversations</h1>
+    <input type="file" id="fileInput" accept=".jsonl">
+    <div id="filePath"></div>
+    <div id="filter">
+        <label for="indexDropdown">Select Index: </label>
+        <select id="indexDropdown" onchange="filterByDropdown()">
+            <option value="">Select an index...</option>
+        </select>
+        <br><br>
+        <label for="indexFilter">Search Index: </label>
+        <input type="text" id="indexFilter" placeholder="Enter index..." oninput="filterBySearch()">
+        <br><br>
+        <label for="successFilter">Filter by Result: </label>
+        <select id="successFilter" onchange="filterBySuccess()">
+            <option value="">All</option>
+            <option value="true">Success</option>
+            <option value="false">Failure</option>
+        </select>
+        <br><br>
+        <label for="compactToggle">Display Compact: </label>
+        <input type="checkbox" id="compactToggle" checked onchange="toggleCompact()">
+    </div>
+    <div id="searchResults"></div>
+    <div id="conversationTitle"></div>
+    <div class="conversation" id="conversation"></div>
+    <div id="errorMessage" style="color: red;"></div>
+
+    <script>
+        let isCompact = true;
+        let currentConversation = null;
+
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = ''; // Clear any previous error messages
+
+            if (!file) {
+                errorMessage.textContent = 'No file selected.';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const lines = e.target.result.split('\n').filter(line => line.trim() !== '');
+                    conversations = lines.map(line => {
+                        try {
+                            return JSON.parse(line);
+                        } catch (error) {
+                            console.error('Error parsing JSON line:', line, error);
+                            throw new Error('Invalid JSON format.');
+                        }
+                    }).filter(conversation => conversation !== null);
+                    populateDropdown();
+                    if (conversations.length > 0) {
+                        displayConversation(conversations[0]);
+                        currentConversation = conversations[0];
+                    } else {
+                        errorMessage.textContent = 'No valid conversations found in the file.';
+                    }
+                } catch (error) {
+                    console.error('Error reading file:', error);
+                    errorMessage.textContent = 'Error reading file: ' + error.message;
+                }
+            };
+            reader.onerror = function() {
+                errorMessage.textContent = 'Error reading file.';
+            };
+            reader.readAsText(file);
+        });
+
+        function populateDropdown() {
+            const indexDropdown = document.getElementById('indexDropdown');
+            indexDropdown.innerHTML = '<option value="">Select an index...</option>';
+            conversations.forEach(conversation => {
+                const option = document.createElement('option');
+                option.value = conversation.output.index;
+                option.textContent = conversation.output.index;
+                indexDropdown.appendChild(option);
+            });
+        }
+
+        function toggleCompact() {
+            isCompact = document.getElementById('compactToggle').checked;
+            if (currentConversation) {
+                displayConversation(currentConversation);
+            }
+        }
+
+        function createMessageDiv(role, content, label) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', role);
+
+            const labelSpan = document.createElement('span');
+            labelSpan.classList.add('message-label', `${role}-label`);
+            labelSpan.textContent = label;
+
+            messageDiv.appendChild(labelSpan);
+            const contentSpan = document.createElement('span');
+            contentSpan.innerHTML = isCompact ? content.replace(/\n/g, ' ') : content.replace(/\n/g, '<br>');
+            messageDiv.appendChild(contentSpan);
+
+            return messageDiv;
+        }
+
+        function displayConversation(data) {
+            currentConversation = data;
+            const conversationContainer = document.getElementById('conversation');
+            const conversationTitle = document.getElementById('conversationTitle');
+            const errorMessage = document.getElementById('errorMessage');
+            conversationContainer.innerHTML = '';
+            conversationTitle.innerHTML = '';
+            errorMessage.textContent = '';
+
+            if (data) {
+                const resultClass = data.output.result.result ? 'result-true' : 'result-false';
+                const title = `${data.output.index} - Result: ${data.output.result.result} - Confidences: ${data.output.result.confidences ? data.output.result.confidences.join(', ') : 'N/A'}`;
+                conversationTitle.textContent = title;
+                conversationTitle.className = resultClass;
+                data.output.history.forEach(message => {
+                    let messageDiv = createMessageDiv(message.role, message.content, message.role === 'user' ? 'User:' : 'Agent:');
+                    conversationContainer.appendChild(messageDiv);
+
+                    if (message.reasoning !== undefined) {
+                        let reasoningDiv = createMessageDiv('agent', message.reasoning, 'Reasoning:');
+                        reasoningDiv.classList.add('reasoning');
+                        conversationContainer.appendChild(reasoningDiv);
+                    } else if (message.confidence !== undefined) {
+                        let confidenceDiv = createMessageDiv('agent', `Confidence: ${message.confidence}%`, 'Confidence:');
+                        conversationContainer.appendChild(confidenceDiv);
+                    }
+                });
+            } else {
+                errorMessage.textContent = 'No conversation data available.';
+            }
+        }
+
+        function filterByDropdown() {
+            const index = document.getElementById('indexDropdown').value;
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = ''; // Clear any previous error messages
+
+            if (index) {
+                const filteredConversation = conversations.find(conv => conv.output.index === index);
+                if (filteredConversation) {
+                    displayConversation(filteredConversation);
+                } else {
+                    errorMessage.textContent = 'Conversation not found.';
+                }
+            }
+        }
+
+        function filterBySearch() {
+            const searchTerm = document.getElementById('indexFilter').value.toLowerCase();
+            const searchResultsContainer = document.getElementById('searchResults');
+            const errorMessage = document.getElementById('errorMessage');
+            searchResultsContainer.innerHTML = '';
+            errorMessage.textContent = ''; // Clear any previous error messages
+
+            if (searchTerm === '') {
+                displayConversation(null);
+                return;
+            }
+
+            const filteredConversations = conversations.filter(conv => conv.output.index.toLowerCase().includes(searchTerm));
+            if (filteredConversations.length > 0) {
+                filteredConversations.forEach(conv => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.textContent = conv.output.index;
+                    resultDiv.onclick = () => displayConversation(conv);
+                    searchResultsContainer.appendChild(resultDiv);
+                });
+                displayConversation(filteredConversations[0]);
+            } else {
+                displayConversation(null);
+            }
+        }
+
+        function filterBySuccess() {
+            const successFilter = document.getElementById('successFilter').value;
+            const searchResultsContainer = document.getElementById('searchResults');
+            const errorMessage = document.getElementById('errorMessage');
+            searchResultsContainer.innerHTML = '';
+            errorMessage.textContent = ''; // Clear any previous error messages
+
+            let filteredConversations;
+
+            if (successFilter === 'true') {
+                filteredConversations = conversations.filter(conv => conv.output.result.result === true);
+            } else if (successFilter === 'false') {
+                filteredConversations = conversations.filter(conv => conv.output.result.result === false);
+            } else {
+                filteredConversations = conversations;
+            }
+
+            if (filteredConversations.length > 0) {
+                filteredConversations.forEach(conv => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.textContent = conv.output.index;
+                    resultDiv.onclick = () => displayConversation(conv);
+                    searchResultsContainer.appendChild(resultDiv);
+                });
+                displayConversation(filteredConversations[0]);
+            } else {
+                displayConversation(null);
+            }
+        }
+    </script>
+</body>
+</html>

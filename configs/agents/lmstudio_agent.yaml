@@ -1,16 +1,12 @@
 module: src.client.agents.HTTPAgent
 parameters:
-  url: https://api.openai.com/v1/chat/completions
-#  url: http://localhost:5555/v1/chat/completions
+  url: http://localhost:5555/v1/chat/completions
   headers:
     Content-Type: application/json
-    Authorization: Bearer <% PUT-YOUR-OPENAI-KEY-HERE %>
   body:
     temperature: 0
-    seed: 0
   prompter:
     name: role_content_dict
     args:
       agent_role: assistant
-  logits_format: "{response[choices][0][logprobs][content][0][logprob]}"
   return_format: "{response[choices][0][message][content]}"

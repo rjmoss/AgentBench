@@ -5,11 +5,15 @@ default:
     command: umask 0; [ -f /root/.setup.sh ] && bash /root/.setup.sh;
   parameters:
     name: alfworld-std
-    data_path: "/AgentBench/data/alfworld"
+#    data_path: "/AgentBench/data/alfworld"
+    data_path: "/Users/robertmoss/dev/agent-evals/AgentBench/data/alfworld"
     config_path: "src/server/tasks/alfworld/configs/base_config.yaml"
     prompts_path: "src/server/tasks/alfworld/prompts/alfworld_multiturn_plan_first.json"
     split: "standard"
     max_step: 35
+
+    # custom
+    retry_invalid_action: true
 
 alfworld-dev:
   parameters:

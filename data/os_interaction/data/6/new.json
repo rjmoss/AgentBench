@@ -1,6 +1,6 @@
 [
     {
-        "description": "execute ~/test and get the output",
+        "description": "execute /home/jack/test and get the output",
         "create": {
             "init": {
                 "code": "useradd -s /bin/bash -d /home/jack -m jack && cd /home/jack && echo 'echo a3b0c7' > test && chmod 000 test && chown jack test &&su - jack"
@@ -10,12 +10,12 @@
             "match": "a3b0c7"
         },
         "example": {
-            "code": "chmod 777 test && ~/test"
+            "code": "chmod 777 /home/jack/test && /home/jack/test"
         },
         "labels": ["permission", "user"]
     },
     {
-        "description": "What will be the output if I execute ~/test?",
+        "description": "What will be the output if I execute /home/jack/test?",
         "create": {
             "init": {
                 "code": "useradd -s /bin/bash -d /home/jack -m jack && cd /home/jack && echo 'echo a3b0c7' > test && chmod 000 test && chown jack test &&su - jack"
@@ -25,7 +25,7 @@
             "match": "a3b0c7"
         },
         "example": {
-            "code": "chmod 777 test && ~/test"
+            "code": "chmod 777 /home/jack/test && /home/jack/test"
         },
         "labels": ["permission", "user"]
     },

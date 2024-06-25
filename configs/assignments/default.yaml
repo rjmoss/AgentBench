@@ -2,16 +2,56 @@ import: definition.yaml
 
 concurrency:
   task:
-    dbbench-std: 5
-    os-std: 5
+#    dbbench-std: 5
+#    dbbench-dev: 5
+#    os-std: 5
+#    os-dev: 5
+
+    alfworld-std: 2
+    alfworld-dev: 1
+    avalon-dev-single: 1
+    cg-dev: 3
+    dbbench-dev: 1
+    kg-dev: 1
+    ltp-dev: 1
+    m2w-dev: 1
+    webshop-dev: 1
+    os-dev: 1
+    os-std: 1
   agent:
-    gpt-3.5-turbo-0613: 5
+    gpt-3.5-turbo: 1
+    gpt-3.5-turbo-1106: 1
+    gpt-4-turbo: 1
+    gpt-4: 1
+    gpt-4o-2024-05-13: 1
+    mistral-7b-instruct: 1
+    Llama-3-8B-Instruct: 1
 
 assignments: # List[Assignment] | Assignment
   - agent: # "task": List[str] | str ,  "agent": List[str] | str
-      - gpt-3.5-turbo-0613
+#      In price order (ascending)
+#      - mistral-7b-instruct
+#      - Llama-3-8B-Instruct
+#      - gpt-3.5-turbo
+#      - gpt-3.5-turbo-1106
+#      - gpt-4o-2024-05-13
+      - gpt-4-turbo
+#      - gpt-4
     task:
-      - dbbench-std
-      - os-std
+#      - dbbench-std
+#      - dbbench-dev
+#      - os-std
+      - os-dev
+#      - alfworld-dev
+#      - avalon-dev-single
+#      - cg-dev
+#      - dbbench-dev
+#      - kg-dev
+#      - ltp-dev
+#      - m2w-dev
+#       - webshop-dev
+#      - os-dev
+
+#      - alfworld-std
 
 output: "outputs/{TIMESTAMP}"

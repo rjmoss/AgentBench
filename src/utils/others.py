@@ -1,4 +1,5 @@
 import json
+import os
 
 import numpy as np
 
@@ -68,3 +69,10 @@ class ColorMessage:
     @staticmethod
     def yellow(msg):
         return "\033[93m" + msg + "\033[0m"
+
+
+def clear_file(file_path):
+    try:
+        os.remove(file_path)
+    except FileNotFoundError:
+        pass

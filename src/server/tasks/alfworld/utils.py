@@ -47,7 +47,7 @@ def process_action(action, choices, limit=0.01, to_print=False):
         print("encounter exception: ", e)
         print("choices: ", choices)
         print("action: ", action)
-    return action
+    return False
 
 def load_prompts(prompts_file):
     with open(prompts_file, 'r') as f:
