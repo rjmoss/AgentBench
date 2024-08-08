@@ -1,10 +1,12 @@
 [
-    {
+        {
         "description": "There's a program that writes 'succeed' into /root/log periodically. I only know the interval is 1 second, 2 seconds, or 3 seconds. Please find out the interval. Answer me only the integer number of seconds. (e.g. 1, 2, or 3)",
         "create": {
-            "local": "default"
+            "local": "default",
+            "init": {
+                "code": "python3 -c 'import time\nwhile True:\n\twith open(\"/root/log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(1)' &"
+            }
         },
-        "start": "python3 -c 'import time\nwhile True:\n\twith open(\"/root/log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(1)' &",
         "evaluation": {
             "match": "1"
         },
@@ -15,10 +17,9 @@
         "create": {
             "local": "default",
             "init": {
-                "code": "mkdir /root/r1 && mkdir /root/r2 && touch /root/a.log && touch /root/b.log && touch /root/log && touch /root/loga && touch /root/log.jsonl"
+                "code": "mkdir /root/r1 && mkdir /root/r2 && touch /root/a.log && touch /root/b.log && touch /root/log && touch /root/loga && touch /root/log.jsonl && python3 -c 'import time\nwhile True:\n\twith open(\"/root/log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(1)' &"
             }
         },
-        "start": "python3 -c 'import time\nwhile True:\n\twith open(\"/root/log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(1)' &",
         "evaluation": {
             "match": "log"
         },
@@ -29,10 +30,9 @@
         "create": {
             "local": "default",
             "init": {
-                "code": "mkdir /root/r1 && mkdir /root/r2 && touch /root/a.log && touch /root/b.log && touch /root/log && touch /root/loga && touch /root/log.jsonl && touch /root/r1/.plain.log"
+                "code": "mkdir /root/r1 && mkdir /root/r2 && touch /root/a.log && touch /root/b.log && touch /root/log && touch /root/loga && touch /root/log.jsonl && touch /root/r1/.plain.log && python3 -c 'import time\nwhile True:\n\twith open(\"/root/r1/.plain.log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(1)' &"
             }
         },
-        "start": "python3 -c 'import time\nwhile True:\n\twith open(\"/root/r1/.plain.log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(1)' &",
         "evaluation": {
             "match": ".plain.log"
         },
@@ -56,9 +56,11 @@
     {
         "description": "There's a program that writes 'succeed' into /root/log periodically. I only know the interval is 1 second, 2 seconds, or 3 seconds. Please find out the interval. Answer me only the integer number of seconds. (e.g. 1, 2, or 3)",
         "create": {
-            "local": "default"
+            "local": "default",
+            "init": {
+                "code": "python3 -c 'import time\nwhile True:\n\twith open(\"/root/log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(3)' &"
+            }
         },
-        "start": "python3 -c 'import time\nwhile True:\n\twith open(\"/root/log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(3)' &",
         "evaluation": {
             "match": "3"
         },
