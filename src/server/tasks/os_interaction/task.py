@@ -86,6 +86,10 @@ class Container:
         # if params:
         #     print("== Parameters ==\n", params)
         if language == "bash":
+            # Modify the command to always reload .bashrc (if it hasn't already). The alternative is to change all the
+            # relevant tasks so that they do this
+            if 'source ~/.bashrc' not in command:
+                command = f"source ~/.bashrc && {command}"
             cmd = ["bash", "-c", command]
             if params:
                 cmd.append("--")
