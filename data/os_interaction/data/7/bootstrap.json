@@ -256,7 +256,7 @@
         }
     },
     {
-        "description": "You have been given a directory named \"file_analysis\" in the home directory.\n2. Inside the \"file_analysis\" directory, there are 100 text files named \"file-number.txt,\" where the number is replaced with their corresponding index in the range. How many files with an odd index are there?",
+        "description": "You have been given a directory named \"file_analysis\" in the home directory. Inside the \"file_analysis\" directory, there are 100 text files named \"file-number.txt\", where the number is replaced with their corresponding index in the range. What is the sum of the contents of the odd indexed files?",
         "explanation": "To solve this problem, follow these steps:\n\n1. Create a directory using the `mkdir` command.\n2. Use a loop to create the files and write the index values.\n3. Use `grep`, `awk` or `sed` to filter odd indexed files and a loop to read the contents.\n4. Perform the arithmetic operation to calculate the sum.",
         "create": {
             "init": "\n#!/bin/bash\n\n# Create the file_analysis folder in the home directory\nmkdir ~/file_analysis\n\n# Create 100 files within the file_analysis folder\nfor i in {1..100}; do\n  echo $i > ~/file_analysis/file-$i.txt\ndone"
