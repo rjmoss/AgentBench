@@ -209,7 +209,7 @@
                 }
             ],
             "example": {
-                "code": "find /home -type d | wc -l"
+                "code": "find /home -mindepth 1 -type d | wc -l"
             }
         },
         "labels": ["file"]
@@ -345,7 +345,7 @@
                     "file": "check/integer-match.py"
                 }
             ],
-            "example": "getent passwd | cut -d: -f1 | while read user; do group_count=$(groups $user | cut -d ':' -f 2 | tr -s ' ' | sed 's/^ *//;s/ *$//' | tr ' ' '\\n' | grep -v '^$' | wc -l); if [ $group_count -ge 2 ]; then echo $user; fi; done | wc -l"
+            "example": "getent passwd | cut -d: -f1 | while read user; do groups $user | cut -d ':' -f 2 | tr -s ' ' | sed 's/^ *//;s/ *$//' | grep -q ' ' && echo $user; done | wc -l"
         },
         "labels": ["user"]
     },
