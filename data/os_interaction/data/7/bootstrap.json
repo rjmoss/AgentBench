@@ -458,7 +458,7 @@
         }
     },
     {
-        "description": "This problem is designed to test your ability to navigate and manipulate files and directories using Linux command line tools. You have been supplied with an Ubuntu operating system.\n\nThere is an initialization bash script that will set up the required environment and files. Your task is to determine the total number of occurrences of a specific word across all '.txt' files in a specific directory.\n\nYou need to perform the following steps:\n\n1. Execute the initialization bash script to set up the required environment.\n2. Navigate to the 'target_directory', which will be created during initialization.\n3. Execute a command that will help you count the total occurrences of the word 'linux' (case insensitive) in all the '.txt' files inside the 'target_directory'.\n4. The output of the command should be a single integer - the total number of occurrences of the word 'linux'.",
+        "description": "This problem is designed to test your ability to navigate and manipulate files and directories using Linux command line tools. You have been supplied with an Ubuntu operating system.\n\nThere is an initialization bash script that will set up the required environment and files. Your task is to determine the total number of occurrences of a specific word across all '.txt' files in a specific directory.\n\nYou need to perform the following steps:\n\n1. Navigate to the 'target_directory', which will be created during initialization.\n2. Execute a command that will help you count the total occurrences of the word 'linux' (case insensitive) in all the '.txt' files inside the 'target_directory'.\n3. The output of the command should be a single integer - the total number of occurrences of the word 'linux'. \n What is the result of running the command?",
         "explanation": "To solve the problem:\n\n1. First, execute the initialization script to set up the environment required.\n2. Once the environment is set up, navigate to the 'target_directory'.\n3. Use the 'grep' command to search for the word 'linux' in all '.txt' files, combined with 'wc -l' to count occurrences.",
         "create": {
             "init": "\n#!/bin/bash\n\n# Create target_directory and files for the problem\nmkdir -p target_directory\necho 'This linux is a popular operating linux system.' > target_directory/file1.txt\necho 'Linux is basically everywhere, especially in servers.' > target_directory/file2.txt\necho 'Linux is reliable and linux secure.' > target_directory/file3.txt\necho 'Linux distributions like Ubuntu, Arch, and Fedora are popular.' > target_directory/file4.txt"
@@ -641,7 +641,7 @@
                     "file": "check/integer-match.py"
                 }
             ],
-            "example": "#!/bin/bash\nfind /var/log -type d | wc -l"
+            "example": "#!/bin/bash\nfind /var/log -mindepth 1 -type d | wc -l"
         }
     },
     {
