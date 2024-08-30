@@ -1,38 +1,38 @@
-[ 
-    {
+[
+        {
         "description": "There's a program that writes 'succeed' into /root/log periodically. I only know the interval is 1 second, 2 seconds, or 3 seconds. Please find out the interval. Answer me only the integer number of seconds. (e.g. 1, 2, or 3)",
         "create": {
-            "local": "default"
+            "local": "default",
+            "init": {
+                "code": "python3 -c 'import time\nwhile True:\n\twith open(\"/root/log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(1)' &"
+            }
         },
-        "start": "python3 -c 'import time\nwhile True:\n\twith open(\"/root/log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(1)' &",
         "evaluation": {
             "match": "1"
         },
         "labels": ["file", "process", "background"]
     },
     {
-        "description": "There's a program that writes something into /root every 1 second. I want to know what is the file. tell me the filename please. (without its directory)",
+        "description": "There's a program that writes something into /root every 1 second. I want to know what is the file that is being written into, tell me the filename please (without its directory)",
         "create": {
             "local": "default",
             "init": {
-                "code": "mkdir /root/r1 && mkdir /root/r2 && touch /root/a.log && touch /root/b.log && touch /root/log && touch /root/loga && touch /root/log.jsonl"
+                "code": "mkdir /root/r1 && mkdir /root/r2 && touch /root/a.log && touch /root/b.log && touch /root/log && touch /root/loga && touch /root/log.jsonl && python3 -c 'import time\nwhile True:\n\twith open(\"/root/log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(1)' &"
             }
         },
-        "start": "python3 -c 'import time\nwhile True:\n\twith open(\"/root/log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(1)' &",
         "evaluation": {
             "match": "log"
         },
         "labels": ["file", "process", "background"]
     },
     {
-        "description": "There's a program that writes something into /root every 1 second. I want to know what is the file. tell me the filename please. (without its directory)",
+        "description": "There's a program that writes something into /root every 1 second. I want to know what is the file that is being written into, tell me the filename please (without its directory)",
         "create": {
             "local": "default",
             "init": {
-                "code": "mkdir /root/r1 && mkdir /root/r2 && touch /root/a.log && touch /root/b.log && touch /root/log && touch /root/loga && touch /root/log.jsonl && touch /root/r1/.plain.log"
+                "code": "mkdir /root/r1 && mkdir /root/r2 && touch /root/a.log && touch /root/b.log && touch /root/log && touch /root/loga && touch /root/log.jsonl && touch /root/r1/.plain.log && python3 -c 'import time\nwhile True:\n\twith open(\"/root/r1/.plain.log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(1)' &"
             }
         },
-        "start": "python3 -c 'import time\nwhile True:\n\twith open(\"/root/r1/.plain.log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(1)' &",
         "evaluation": {
             "match": ".plain.log"
         },
@@ -56,9 +56,11 @@
     {
         "description": "There's a program that writes 'succeed' into /root/log periodically. I only know the interval is 1 second, 2 seconds, or 3 seconds. Please find out the interval. Answer me only the integer number of seconds. (e.g. 1, 2, or 3)",
         "create": {
-            "local": "default"
+            "local": "default",
+            "init": {
+                "code": "python3 -c 'import time\nwhile True:\n\twith open(\"/root/log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(3)' &"
+            }
         },
-        "start": "python3 -c 'import time\nwhile True:\n\twith open(\"/root/log\", \"a+\") as f:\n\t\tf.write(\"succeed\")\n\ttime.sleep(3)' &",
         "evaluation": {
             "match": "3"
         },
@@ -96,13 +98,13 @@
                 }
             ],
             "example": {
-                "code": "ls -a /home | grep \"^\\.\" | wc -l"
+                "code": "ls -A /home | grep \"^\\.\" | wc -l"
             }
         },
         "labels": ["file"]
     },
     {
-        "description": "How many files whose name starts with letter exist in /root?",
+        "description": "How many files whose name starts with a letter exist in /root?",
         "create": {
             "local": "default",
             "init": {
@@ -207,7 +209,7 @@
                 }
             ],
             "example": {
-                "code": "find /home -type d | wc -l"
+                "code": "find /home -mindepth 1 -type d | wc -l"
             }
         },
         "labels": ["file"]
@@ -363,7 +365,7 @@
                     "file": "check/integer-match.py"
                 }
             ],
-            "example": "getent passwd | cut -d: -f1 | while read user; do groups $user | cut -d ':' -f 2 | tr -s ' ' | sed 's/^ *//;s/ *$//' | tr ' ' '\\n' | grep -v '^$' | wc -l | grep -q -w '4' && echo $user; done | wc -l"
+            "example": "getent passwd | cut -d: -f1 | while read user; do group_count=$(groups $user | cut -d ':' -f 2 | tr -s ' ' | sed 's/^ *//;s/ *$//' | tr ' ' '\\n' | grep -v '^$' | wc -l); if [ $group_count -ge 4 ]; then echo $user; fi; done | wc -l"
         },
         "labels": ["user"]
     },
@@ -420,6 +422,7 @@
                 "code": "useradd -s /bin/bash -d /home/jack -m jack && cd /home/jack && echo 'echo Awesome-AgentBench' > test && chmod 000 test && chown jack test && su - jack"
             }
         },
+        "start": "su - jack",
         "evaluation": {
             "match": "Awesome-AgentBench"
         },
@@ -427,7 +430,7 @@
             "code": "chmod 777 test && ~/test"
         },
         "labels": ["permission", "user"]
-    },   
+    },
     {
         "description": "Stock logs are shown in /usr/stock.log. The last two columns are stock index and count respectively. Tell me how many times Bob sold a stock.",
         "create": {

@@ -61,13 +61,13 @@
                 }
             ],
             "example": {
-                "code": "ls -a /usr | grep \"^\\.\" | wc -l"
+                "code": "ls -A /usr | grep \"^\\.\" | wc -l"
             }
         },
         "labels": ["file"]
     },
     {
-        "description": "How many files whose name starts with letter exist in /usr?",
+        "description": "How many files whose name starts with a letter exist in /usr?",
         "create": {
             "local": "default",
             "init": {
@@ -83,7 +83,7 @@
                 }
             ],
             "example": {
-                "code": "ls -1  | grep \"^[[:alpha:]]\" | wc -l"
+                "code": "find /usr -maxdepth 1 -type f -name \"[a-zA-Z]*\" | wc -l\n"
             }
         },
         "labels": ["file"]
@@ -172,7 +172,7 @@
                 }
             ],
             "example": {
-                "code": "find /usr -type d | wc -l"
+                "code": "find /usr -mindepth 1 -type d | wc -l"
             }
         },
         "labels": ["file"]

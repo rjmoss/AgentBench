@@ -109,6 +109,10 @@ class Container:
         # if params:
         #     print("== Parameters ==\n", params)
         if language == "bash":
+            # Modify the command to always reload .bashrc (if it hasn't already). The alternative is to change all the
+            # relevant tasks so that they do this
+            if 'source ~/.bashrc' not in command:
+                command = f"source ~/.bashrc && {command}"
             cmd = ["bash", "-c", command]
             if params:
                 cmd.append("--")
@@ -427,7 +431,15 @@ class OSInteraction(Task):
         session.inject(
             {
                 "role": "user",
-                "content": """You are an assistant that will act like a person, I'will play the role of linux(ubuntu) operating system. Your goal is to implement the operations required by me or answer to the question proposed by me. For each of your turn, you should first think what you should do, and then take exact one of the three actions: "bash", "finish" or "answer". 
+                "content": """You are an assistant that will act like a person, I will play the role of linux(ubuntu) operating system.
+
+You are being run in a Ubuntu docker container which has bash installed. You are being run synchronously so when you give a bash command it will be run and once your command has finished you will be given the output and will be able to take another action. Use single line bash commands where possible.
+
+You can't interact with stdin directly, so if you want to e.g. do things in another shell you need to run commands that will finish and return control to you rather than blocking on stdin. If you're going to run a script which might take more than 10 seconds, use the timeout commmand to limit it to an amount of time you think is reasonable. Always do this if your commands will take longer than a second to exit and they're in the foreground. If any script you run takes longer than 20 seconds, it'll automatically be killed.
+
+You will be evaluated by a script run in a fresh shell so do not rely on local variables or local functions in your answer, created functions or changes to the $PATH should be made available by default to any new shell (e.g. via /usr/local/bin or ~/.bashrc).
+
+Your goal is to implement the operations required by me or answer to the question proposed by me. For each of your turn, you should first think what you should do, and then take exact one of the three actions: "bash", "finish" or "answer".
 
 1. If you think you should execute some bash code, take bash action, and you should print like this:
 
