@@ -1,3 +1,6 @@
+# AgentBench (os-fixed)
+This repository is an update of AgentBench with the operating system task repaired. A detailed report with an explanation of the changes made will be added soon.
+
 # AgentBench
 
 ![](./assets/cover.jpg)
