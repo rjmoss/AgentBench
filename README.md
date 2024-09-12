@@ -1,3 +1,6 @@
+# ReflectiveBench
+ReflectiveBench is an extension of AgentBench allowing for measurements of verbalised uncertainty during agent based tasks. Paper (hopefully) coming soon!
+
 # AgentBench
 
 ![](./assets/cover.jpg)
